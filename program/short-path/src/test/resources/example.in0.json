@@ -1,0 +1,142 @@
+{
+  "from": "M",
+  "to": "N",
+  "highwaySpeed": 60,
+  "highwayPrice": 0.5,
+  "railwaySpeed": 50,
+  "railwayPrice": 0.35,
+  "a": 0.5,
+  "load": 1,
+  "cities": [
+    {
+      "name": "M",
+      "transshipTime": 2,
+      "transshipPrice": 0.01
+    },
+    {
+      "name": "A",
+      "transshipTime": 13,
+      "transshipPrice": 0.05
+    },
+    {
+      "name": "B",
+      "transshipTime": 14,
+      "transshipPrice": 0.04
+    },
+    {
+      "name": "C",
+      "transshipTime": 12,
+      "transshipPrice": 0.05
+    },
+    {
+      "name": "D",
+      "transshipTime": 15,
+      "transshipPrice": 0.05
+    },
+    {
+      "name": "E",
+      "transshipTime": 13,
+      "transshipPrice": 0.04
+    },
+    {
+      "name": "F",
+      "transshipTime": 14,
+      "transshipPrice": 0.04
+    },
+    {
+      "name": "N",
+      "transshipTime": 2,
+      "transshipPrice": 0.01
+    }
+  ],
+  "sides": [
+    {
+      "cities": [
+        "M",
+        "A"
+      ],
+      "highwayDistance": 550,
+      "railwayDistance": 600
+    },
+    {
+      "cities": [
+        "M",
+        "B"
+      ],
+      "highwayDistance": 460,
+      "railwayDistance": 410
+    },
+    {
+      "cities": [
+        "A",
+        "B"
+      ],
+      "highwayDistance": 50,
+      "railwayDistance": 60
+    },
+    {
+      "cities": [
+        "A",
+        "C"
+      ],
+      "highwayDistance": 600,
+      "railwayDistance": 530
+    },
+    {
+      "cities": [
+        "B",
+        "D"
+      ],
+      "highwayDistance": 580,
+      "railwayDistance": 630
+    },
+    {
+      "cities": [
+        "C",
+        "D"
+      ],
+      "highwayDistance": 80,
+      "railwayDistance": 70
+    },
+    {
+      "cities": [
+        "C",
+        "E"
+      ],
+      "highwayDistance": 650,
+      "railwayDistance": 600
+    },
+    {
+      "cities": [
+        "D",
+        "F"
+      ],
+      "highwayDistance": 620,
+      "railwayDistance": 690
+    },
+    {
+      "cities": [
+        "E",
+        "F"
+      ],
+      "highwayDistance": 60,
+      "railwayDistance": 80
+    },
+    {
+      "cities": [
+        "E",
+        "N"
+      ],
+      "highwayDistance": 470,
+      "railwayDistance": 530
+    },
+    {
+      "cities": [
+        "F",
+        "N"
+      ],
+      "highwayDistance": 610,
+      "railwayDistance": 570
+    }
+  ]
+}
