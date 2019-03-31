@@ -55,12 +55,12 @@ public class ShortPathMap {
             }
             if(city.name.equals(inputData.from)) {
                 for(int i = 1; i < stationNameList.size(); i++) {
-                    edgeInfoList.add(new EdgeInfo(new NodeInfo(city.name, "仓库"), new NodeInfo(city.name, stationNameList.get(i)), weight));
+                    edgeInfoList.add(new EdgeInfo(new NodeInfo(city.name, "仓库"), new NodeInfo(city.name, stationNameList.get(i)), weight / 2));
                 }
             }
             else if(city.name.equals(inputData.to)) {
                 for(int i = 1; i < stationNameList.size(); i++) {
-                    edgeInfoList.add(new EdgeInfo(new NodeInfo(city.name, stationNameList.get(i)), new NodeInfo(city.name, "仓库"), weight));
+                    edgeInfoList.add(new EdgeInfo(new NodeInfo(city.name, stationNameList.get(i)), new NodeInfo(city.name, "仓库"), weight / 2));
                 }
             }
         }
