@@ -49,7 +49,7 @@ public class WebMain {
         resultBuilder
             .append(shortestPathList.get(shortestPathList.size() - 1))
             .append("\n")
-            .append(String.format("%.3f", shortPathMap.shortestWeight));
+            .append(String.format("总权重: %.3f", shortPathMap.shortestWeight));
 
         return resultBuilder.toString().getBytes(UTF_8);
     }
