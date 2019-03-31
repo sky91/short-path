@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -38,8 +39,19 @@ public class WebMain {
         InputData1 inputData1 = JSON.parseObject(new String(inputFile.getBytes(), UTF_8), InputData1.class);
         InputData inputData = inputData1.toInputData();
         ShortPathMap shortPathMap = new ShortPathMap(inputData);
-        String result = String.join(" -> ", shortPathMap.shortestPathList) + "\n" + String.format("%.3f", shortPathMap.shortestWeight);
-        return result.getBytes(UTF_8);
+
+        StringBuilder resultBuilder = new StringBuilder();
+        List<Double> shortestPathWeight = shortPathMap.shortestPathWeight;
+        List<String> shortestPathList = shortPathMap.shortestPathList;
+        for(int i = 0; i < shortestPathWeight.size(); i++) {
+            resultBuilder.append(shortestPathList.get(i)).append(" ---(").append(String.format("%.3f", shortestPathWeight.get(i))).append(")--> ");
+        }
+        resultBuilder
+            .append(shortestPathList.get(shortestPathList.size() - 1))
+            .append("\n")
+            .append(String.format("%.3f", shortPathMap.shortestWeight));
+
+        return resultBuilder.toString().getBytes(UTF_8);
     }
 
     public static void main(String[] args) throws InterruptedException {

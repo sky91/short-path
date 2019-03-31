@@ -10,9 +10,11 @@ import java.util.*;
  */
 public class ShortPathMap {
 
-    public final ArrayList<String> shortestPathList;
+    public final List<String> shortestPathList;
 
     public final double shortestWeight;
+
+    public final List<Double> shortestPathWeight;
 
     private final List<String> cityNameList;
 
@@ -117,6 +119,11 @@ public class ShortPathMap {
         for(int i = pathNodeList.size() - 1; i >= 0; i--) {
             shortestPathList.add(nodeInfoList.get(pathNodeList.get(i)).nodeName());
         }
+
+        shortestPathWeight = new ArrayList<>(pathNodeList.size() - 1);
+        for(int i = pathNodeList.size() - 1; i >= 1; i--) {
+            shortestPathWeight.add(dist[pathNodeList.get(i)][pathNodeList.get(i - 1)]);
+        }
     }
 
     private double weight(double a, double time, double cost) {
@@ -179,6 +186,11 @@ public class ShortPathMap {
             this.from = from;
             this.to = to;
             this.weight = weight;
+        }
+
+        @Override
+        public String toString() {
+            return from + " ---(" + weight + ")--> " + to;
         }
     }
 }
