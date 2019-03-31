@@ -55,7 +55,8 @@ public class ShortPathMap {
                 for(int i = 1; i < stationNameList.size(); i++) {
                     edgeInfoList.add(new EdgeInfo(new NodeInfo(city.name, "仓库"), new NodeInfo(city.name, stationNameList.get(i)), weight));
                 }
-            } else if(city.name.equals(inputData.to)) {
+            }
+            else if(city.name.equals(inputData.to)) {
                 for(int i = 1; i < stationNameList.size(); i++) {
                     edgeInfoList.add(new EdgeInfo(new NodeInfo(city.name, stationNameList.get(i)), new NodeInfo(city.name, "仓库"), weight));
                 }
@@ -119,7 +120,7 @@ public class ShortPathMap {
     }
 
     private double weight(double a, double time, double cost) {
-        return a * time + (1 - a) * cost;
+        return a * time + (1 - a) / 10000 * cost;
     }
 
     private <T> Map<T, Integer> reversMap(List<T> list) {
