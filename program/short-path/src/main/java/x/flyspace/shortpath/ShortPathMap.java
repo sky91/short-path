@@ -10,11 +10,9 @@ import java.util.*;
  */
 public class ShortPathMap {
 
-    public final List<String> shortestPathList;
+    public final List<EdgeInfo> shortestPathEdgeList;
 
     public final double shortestWeight;
-
-    public final List<Double> shortestPathWeight;
 
     private final List<String> cityNameList;
 
@@ -28,39 +26,50 @@ public class ShortPathMap {
 
     private final Map<NodeInfo, Integer> nodeInfoIndexMap;
 
+    private final double a;
+
     public ShortPathMap(InputData inputData) {
+        a = inputData.a;
         Set<String> cityNameSet = new HashSet<>();
         inputData.cities.stream().map(city -> city.name).forEach(cityNameSet::add);
         inputData.sides.stream().flatMap(side -> side.cities.stream()).forEach(cityNameSet::add);
         cityNameList = new ArrayList<>(cityNameSet);
         cityNameIndexMap = reversMap(cityNameList);
 
-        stationNameList = Arrays.asList("仓库", "汽车站", "火车站");
+        stationNameList = Arrays.asList(REPO_NAME, CAR_STATION_NAME, TRAIN_STATION_NAME);
         stationNameIndexMap = reversMap(stationNameList);
 
         ArrayList<EdgeInfo> edgeInfoList = new ArrayList<>();
         for(City city : inputData.cities) {
             double transshipTime = city.transshipTime * inputData.load;
             double transshipCost = city.transshipPrice * inputData.load;
-            double weight = weight(inputData.a, transshipTime, transshipCost);
             for(int i = 1; i < stationNameList.size(); i++) {
                 for(int j = 1; j < stationNameList.size(); j++) {
                     if(i != j) {
                         edgeInfoList.add(new EdgeInfo(new NodeInfo(city.name, stationNameList.get(i)),
                                                       new NodeInfo(city.name, stationNameList.get(j)),
-                                                      weight
+                                                      transshipTime,
+                                                      transshipCost
                         ));
                     }
                 }
             }
             if(city.name.equals(inputData.from)) {
                 for(int i = 1; i < stationNameList.size(); i++) {
-                    edgeInfoList.add(new EdgeInfo(new NodeInfo(city.name, "仓库"), new NodeInfo(city.name, stationNameList.get(i)), weight / 2));
+                    edgeInfoList.add(new EdgeInfo(new NodeInfo(city.name, REPO_NAME),
+                                                  new NodeInfo(city.name, stationNameList.get(i)),
+                                                  transshipTime / 2,
+                                                  transshipCost / 2
+                    ));
                 }
             }
             else if(city.name.equals(inputData.to)) {
                 for(int i = 1; i < stationNameList.size(); i++) {
-                    edgeInfoList.add(new EdgeInfo(new NodeInfo(city.name, stationNameList.get(i)), new NodeInfo(city.name, "仓库"), weight / 2));
+                    edgeInfoList.add(new EdgeInfo(new NodeInfo(city.name, stationNameList.get(i)),
+                                                  new NodeInfo(city.name, REPO_NAME),
+                                                  transshipTime / 2,
+                                                  transshipCost / 2
+                    ));
                 }
             }
         }
@@ -68,18 +77,24 @@ public class ShortPathMap {
         for(Side side : inputData.sides) {
             double highwayTime = side.highwayDistance / inputData.highwaySpeed;
             double highwayCost = side.highwayDistance * inputData.highwayPrice * inputData.load;
-            double highwayWeight = weight(inputData.a, highwayTime, highwayCost);
 
             double railwayTime = side.railwayDistance / inputData.railwaySpeed;
             double railwayCost = side.railwayDistance * inputData.railwayPrice * inputData.load;
-            double railwayWeight = weight(inputData.a, railwayTime, railwayCost);
 
             List<String> cities = side.cities;
             for(int i = 0; i < cities.size(); i++) {
                 for(int j = 0; j < cities.size(); j++) {
                     if(i != j) {
-                        edgeInfoList.add(new EdgeInfo(new NodeInfo(cities.get(i), "汽车站"), new NodeInfo(cities.get(j), "汽车站"), highwayWeight));
-                        edgeInfoList.add(new EdgeInfo(new NodeInfo(cities.get(i), "火车站"), new NodeInfo(cities.get(j), "火车站"), railwayWeight));
+                        edgeInfoList.add(new EdgeInfo(new NodeInfo(cities.get(i), CAR_STATION_NAME),
+                                                      new NodeInfo(cities.get(j), CAR_STATION_NAME),
+                                                      highwayTime,
+                                                      highwayCost
+                        ));
+                        edgeInfoList.add(new EdgeInfo(new NodeInfo(cities.get(i), TRAIN_STATION_NAME),
+                                                      new NodeInfo(cities.get(j), TRAIN_STATION_NAME),
+                                                      railwayTime,
+                                                      railwayCost
+                        ));
                     }
                 }
             }
@@ -103,8 +118,8 @@ public class ShortPathMap {
             dist[nodeInfoIndexMap.get(edgeInfo.from)][nodeInfoIndexMap.get(edgeInfo.to)] = edgeInfo.weight;
         }
 
-        int from = nodeInfoIndexMap.get(new NodeInfo(inputData.from, "仓库"));
-        int to = nodeInfoIndexMap.get(new NodeInfo(inputData.to, "仓库"));
+        int from = nodeInfoIndexMap.get(new NodeInfo(inputData.from, REPO_NAME));
+        int to = nodeInfoIndexMap.get(new NodeInfo(inputData.to, REPO_NAME));
         FloydMap floydMap = new FloydMap(dist);
         shortestWeight = floydMap.dist[from][to];
 
@@ -115,19 +130,15 @@ public class ShortPathMap {
         } while((to = path[from][to]) != from);
         pathNodeList.add(to);
 
-        shortestPathList = new ArrayList<>(pathNodeList.size());
-        for(int i = pathNodeList.size() - 1; i >= 0; i--) {
-            shortestPathList.add(nodeInfoList.get(pathNodeList.get(i)).nodeName());
+        Map<Long, EdgeInfo> edgeInfoMap = new HashMap<>();
+        for(EdgeInfo edgeInfo : edgeInfoList) {
+            edgeInfoMap.put((long) nodeInfoIndexMap.get(edgeInfo.from) << 32 | nodeInfoIndexMap.get(edgeInfo.to), edgeInfo);
         }
 
-        shortestPathWeight = new ArrayList<>(pathNodeList.size() - 1);
+        shortestPathEdgeList = new ArrayList<>(pathNodeList.size() - 1);
         for(int i = pathNodeList.size() - 1; i >= 1; i--) {
-            shortestPathWeight.add(dist[pathNodeList.get(i)][pathNodeList.get(i - 1)]);
+            shortestPathEdgeList.add(edgeInfoMap.get((long) pathNodeList.get(i) << 32 | pathNodeList.get(i - 1)));
         }
-    }
-
-    private double weight(double a, double time, double cost) {
-        return a * time + (1 - a) / 10000 * cost;
     }
 
     private <T> Map<T, Integer> reversMap(List<T> list) {
@@ -175,22 +186,38 @@ public class ShortPathMap {
         }
     }
 
-    public static class EdgeInfo {
+    public class EdgeInfo {
         public final NodeInfo from;
 
         public final NodeInfo to;
 
+        public final double time;
+
+        public final double cost;
+
         public final double weight;
 
-        public EdgeInfo(NodeInfo from, NodeInfo to, double weight) {
+        public EdgeInfo(NodeInfo from, NodeInfo to, double time, double cost) {
             this.from = from;
             this.to = to;
-            this.weight = weight;
+            this.time = time;
+            this.cost = cost;
+            this.weight = weight(a, time, cost);
         }
 
         @Override
         public String toString() {
             return from + " ---(" + weight + ")--> " + to;
         }
+    }
+
+    private static final String REPO_NAME = "仓库　";
+
+    private static final String CAR_STATION_NAME = "汽车站";
+
+    private static final String TRAIN_STATION_NAME = "火车站";
+
+    private static double weight(double a, double time, double cost) {
+        return a * time + (1 - a) / 10000 * cost;
     }
 }

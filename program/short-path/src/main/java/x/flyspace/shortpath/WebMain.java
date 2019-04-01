@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import x.flyspace.shortpath.ShortPathMap.EdgeInfo;
 
 import java.io.IOException;
 import java.util.List;
@@ -39,17 +40,22 @@ public class WebMain {
         InputData1 inputData1 = JSON.parseObject(new String(inputFile.getBytes(), UTF_8), InputData1.class);
         InputData inputData = inputData1.toInputData();
         ShortPathMap shortPathMap = new ShortPathMap(inputData);
+        List<EdgeInfo> shortestPathEdgeList = shortPathMap.shortestPathEdgeList;
 
+        double totalTime = 0, totalCost = 0;
         StringBuilder resultBuilder = new StringBuilder();
-        List<Double> shortestPathWeight = shortPathMap.shortestPathWeight;
-        List<String> shortestPathList = shortPathMap.shortestPathList;
-        for(int i = 0; i < shortestPathWeight.size(); i++) {
-            resultBuilder.append(shortestPathList.get(i)).append(" ---(").append(String.format("%.3f", shortestPathWeight.get(i))).append(")--> ");
+        resultBuilder.append('[').append(shortestPathEdgeList.get(0).from).append("]\n");
+        for(int i = 0; i < shortestPathEdgeList.size(); i++) {
+            EdgeInfo edgeInfo = shortestPathEdgeList.get(i);
+            totalTime += edgeInfo.time;
+            totalCost += edgeInfo.cost;
+            resultBuilder
+                .append("--> [")
+                .append(edgeInfo.to)
+                .append("]")
+                .append(String.format(" (时间=%-7.3f; 费用=%-12.3f; 权重=%-8.3f)\n", edgeInfo.time, edgeInfo.cost, edgeInfo.weight));
         }
-        resultBuilder
-            .append(shortestPathList.get(shortestPathList.size() - 1))
-            .append("\n")
-            .append(String.format("总权重: %.3f", shortPathMap.shortestWeight));
+        resultBuilder.append("\n").append(String.format("总时间=%-7.3f; 总费用=%-12.3f; 总权重=%-8.3f", totalTime, totalCost, shortPathMap.shortestWeight));
 
         return resultBuilder.toString().getBytes(UTF_8);
     }
